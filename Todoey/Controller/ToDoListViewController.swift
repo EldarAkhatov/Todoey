@@ -9,7 +9,7 @@ import UIKit
 
 class ToDoListViewController: UITableViewController {
 
-    var itemArray = ["Find Mike", "Buy Eggs", "Make money" ]
+    var itemArray = ["Find Mike", "Buy Eggs", "Make money"]
     let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
@@ -18,6 +18,7 @@ class ToDoListViewController: UITableViewController {
         if let items = defaults.array(forKey: Constants.toDoListKey) as? [String] {
             itemArray = items
         }
+        
         
     }
 
