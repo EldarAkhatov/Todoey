@@ -10,29 +10,40 @@ import UIKit
 class ToDoListViewController: UITableViewController {
 
     var itemArray = [Item]()
-    let defaults = UserDefaults.standard
     
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    
+    //MARK: - ViewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let newItem = Item()
-        newItem.title = "Jack"
-        itemArray.append(newItem)
+        loadItems()
         
-        let newItem2 = Item()
-        newItem2.title = "Jane"
-        itemArray.append(newItem2)
+    }
+    
+    //MARK: - Functions
+    
+    func saveItems() {
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Issue with encoding data - \(error)")
+        }
         
-        let newItem3 = Item()
-        newItem3.title = "Bill"
-        itemArray.append(newItem3)
-        
-        
-//        if let items = defaults.array(forKey: Constants.toDoListKey) as? [String] {
-//            itemArray = items
-//        }
-        
-        
+        self.tableView.reloadData()
+    }
+    
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!){
+            let decoder = PropertyListDecoder()
+            do {
+                itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Issue with decoding data - \(error)")
+            }
+        }
     }
 
     
@@ -61,15 +72,9 @@ class ToDoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(itemArray[indexPath.row])
 
-        
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-       
-//        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-//            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-//        } else {
-//            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-//        }
         
+        saveItems()
         
         tableView.deselectRow(at: indexPath, animated: true)
 
@@ -88,8 +93,8 @@ class ToDoListViewController: UITableViewController {
             let newItem = Item()
             newItem.title = textField.text!
             self.itemArray.append(newItem)
-            self.defaults.setValue(self.itemArray, forKey: Constants.toDoListKey)
-            self.tableView.reloadData()
+            
+            self.saveItems()
         }
         
         alert.addTextField { alertTextField in
